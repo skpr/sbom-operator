@@ -1,0 +1,36 @@
+[tools]
+go = "1.26"
+"go:sigs.k8s.io/controller-tools/cmd/controller-gen" = { version = "v0.20.0" }
+"go:sigs.k8s.io/kustomize/kustomize/v5" = { version = "v5.7.1" }
+"github:golangci/golangci-lint" = "2.12"
+
+[env]
+CGO_ENABLED = 0
+
+[tasks.generate]
+description = "Generates deepcopy functions, CRDs and RBAC"
+run = """
+controller-gen object:headerFile=hack/boilerplate.go.txt paths=./...
+controller-gen crd paths=./apis/... output:crd:artifacts:config=config/crd/bases
+controller-gen rbac:roleName=sbom-operator paths=./internal/controller/... output:rbac:artifacts:config=config/rbac
+"""
+
+[tasks.build]
+description = "Builds the binary"
+run = "go build -o bin/sbom ."
+
+[tasks.test]
+description = "Runs the tests"
+run = "go test -coverprofile=coverage.out ./..."
+
+[tasks.lint]
+description = "Lints the code using golangci-lint"
+run = "golangci-lint run"
+
+[tasks.manifests]
+description = "Renders the Kubernetes manifests"
+run = "kustomize build config/default"
+
+[tasks.docker]
+description = "Builds the container image"
+run = "docker build -t sbom-operator:latest ."

@@ -1,0 +1,90 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.20.0
+  name: sboms.security.skpr.io
+spec:
+  group: security.skpr.io
+  names:
+    kind: SBOM
+    listKind: SBOMList
+    plural: sboms
+    singular: sbom
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.image
+      name: Image
+      type: string
+    - jsonPath: .status.phase
+      name: Phase
+      type: string
+    - jsonPath: .status.packages
+      name: Packages
+      type: integer
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: SBOM is the Schema for the sboms API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: SBOMSpec defines the desired state of SBOM.
+            properties:
+              image:
+                description: Image which will be mounted and scanned to generate the
+                  SBOM.
+                type: string
+            required:
+            - image
+            type: object
+          status:
+            description: SBOMStatus defines the observed state of SBOM.
+            properties:
+              completionTime:
+                description: CompletionTime of the SBOM generation.
+                format: date-time
+                type: string
+              id:
+                description: ID of the Pod which generated the SBOM.
+                type: string
+              location:
+                description: Location of the SBOM document eg. s3://bucket/sbom/cluster/namespace/name/sha.cdx.json.gz
+                type: string
+              packages:
+                description: Packages which were discovered when generating the SBOM.
+                type: integer
+              phase:
+                description: Phase of the SBOM generation.
+                type: string
+              startTime:
+                description: StartTime of the SBOM generation.
+                format: date-time
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

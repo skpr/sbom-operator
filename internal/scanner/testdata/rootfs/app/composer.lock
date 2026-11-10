@@ -1,0 +1,14 @@
+{
+    "packages": [
+        {
+            "name": "drupal/core",
+            "version": "10.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/drupal/core.git",
+                "reference": "abcdef"
+            }
+        }
+    ],
+    "packages-dev": []
+}

@@ -1,0 +1,6 @@
+apiVersion: security.skpr.io/v1beta1
+kind: SBOM
+metadata:
+  name: nginx
+spec:
+  image: docker.io/library/nginx:1.29
