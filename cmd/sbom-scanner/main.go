@@ -1,4 +1,5 @@
-package cmd
+// Package main generates an SBOM for a mounted image and stores it in S3. It is run by the operator in scanner Pods.
+package main
 
 import (
 	"bytes"
@@ -88,11 +89,10 @@ func (c *scanCommand) run(_ *kingpin.ParseContext) error {
 	return nil
 }
 
-// Scan declares the "scan" command.
-func Scan(app *kingpin.Application) {
+func main() {
 	c := new(scanCommand)
 
-	cmd := app.Command("scan", "Generates an SBOM for a filesystem and stores it in S3").Action(c.run)
+	cmd := kingpin.New("sbom-scanner", "Generates an SBOM for a filesystem and stores it in S3").Action(c.run)
 
 	cmd.Flag("path", "Path to the filesystem which will be scanned").Envar("SBOM_PATH").Default("/scan").StringVar(&c.Path)
 	cmd.Flag("name", "Name of the component being scanned eg. the image reference").Envar("SBOM_NAME").Required().StringVar(&c.Name)
@@ -101,4 +101,6 @@ func Scan(app *kingpin.Application) {
 	cmd.Flag("key", "Key where the SBOM will be stored").Envar("SBOM_KEY").Required().StringVar(&c.Key)
 	cmd.Flag("endpoint", "Endpoint override for S3 compatible storage").Envar("SBOM_ENDPOINT").StringVar(&c.Endpoint)
 	cmd.Flag("termination-log", "Path where the result summary will be written").Envar("SBOM_TERMINATION_LOG").Default("/dev/termination-log").StringVar(&c.TerminationLog)
+
+	kingpin.MustParse(cmd.Parse(os.Args[1:]))
 }

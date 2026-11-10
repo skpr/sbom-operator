@@ -49,6 +49,8 @@ const (
 
 	// ContainerScanner for querying the "scanner" container.
 	ContainerScanner = "scanner"
+	// ScannerCommand which is run by the "scanner" container (see cmd/sbom-scanner).
+	ScannerCommand = "sbom-scanner"
 
 	// MountScanName for mounting the image which will be scanned.
 	MountScanName = "scan"
@@ -184,7 +186,6 @@ func (r *Reconciler) syncPod(ctx context.Context, sbom *securityv1beta1.SBOM) (s
 	key := Key(r.Params.Prefix, r.Params.Cluster, sbom.Namespace, sbom.Name, Hash(sbom))
 
 	args := []string{
-		"scan",
 		fmt.Sprintf("--path=%s", MountScanPath),
 		fmt.Sprintf("--name=%s", sbom.Spec.Image),
 		fmt.Sprintf("--bucket=%s", r.Params.Bucket),
@@ -230,6 +231,7 @@ func (r *Reconciler) syncPod(ctx context.Context, sbom *securityv1beta1.SBOM) (s
 					Name:      ContainerScanner,
 					Image:     r.Params.Image,
 					Resources: r.Params.Resources,
+					Command:   []string{ScannerCommand},
 					Args:      args,
 					Env: []corev1.EnvVar{
 						{

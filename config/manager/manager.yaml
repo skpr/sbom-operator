@@ -28,8 +28,9 @@ spec:
       containers:
         - name: operator
           image: sbom-operator:latest
+          command:
+            - sbom-operator
           args:
-            - operator
             - --leader-elect
           envFrom:
             - configMapRef:

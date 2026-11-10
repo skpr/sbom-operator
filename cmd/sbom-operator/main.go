@@ -1,7 +1,9 @@
-package cmd
+// Package main runs the operator which reconciles SBOM objects.
+package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -19,8 +21,6 @@ import (
 
 	securityv1beta1 "github.com/skpr/sbom-operator/apis/security/v1beta1"
 	"github.com/skpr/sbom-operator/internal/controller/sbom"
-	"github.com/skpr/sbom-operator/internal/controller/skprrelease"
-	skprv1beta1 "github.com/skpr/sbom-operator/internal/skpr/v1beta1"
 )
 
 type operatorCommand struct {
@@ -39,7 +39,6 @@ type operatorCommand struct {
 	RequestsMemory         string
 	LimitsCPU              string
 	LimitsMemory           string
-	SkprReleases           bool
 	MetricsBindAddress     string
 	HealthProbeBindAddress string
 	LeaderElect            bool
@@ -58,12 +57,6 @@ func (c *operatorCommand) run(_ *kingpin.ParseContext) error {
 
 	if err := securityv1beta1.AddToScheme(scheme); err != nil {
 		return err
-	}
-
-	if c.SkprReleases {
-		if err := skprv1beta1.AddToScheme(scheme); err != nil {
-			return err
-		}
 	}
 
 	tolerations, err := parseTolerations(c.Tolerations)
@@ -117,14 +110,6 @@ func (c *operatorCommand) run(_ *kingpin.ParseContext) error {
 		return fmt.Errorf("failed to setup controller: %w", err)
 	}
 
-	if c.SkprReleases {
-		if err := (&skprrelease.Reconciler{
-			Client: mgr.GetClient(),
-		}).SetupWithManager(mgr); err != nil {
-			return fmt.Errorf("failed to setup controller: %w", err)
-		}
-	}
-
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		return fmt.Errorf("failed to setup health check: %w", err)
 	}
@@ -133,7 +118,7 @@ func (c *operatorCommand) run(_ *kingpin.ParseContext) error {
 		return fmt.Errorf("failed to setup ready check: %w", err)
 	}
 
-	logger.Info("Starting manager", "cluster", c.Cluster, "namespace", c.Namespace, "skprReleases", c.SkprReleases)
+	logger.Info("Starting manager", "cluster", c.Cluster, "namespace", c.Namespace)
 
 	return mgr.Start(ctrl.SetupSignalHandler())
 }
@@ -202,11 +187,10 @@ func parseTolerations(values []string) ([]corev1.Toleration, error) {
 	return tolerations, nil
 }
 
-// Operator declares the "operator" command.
-func Operator(app *kingpin.Application) {
+func main() {
 	c := new(operatorCommand)
 
-	cmd := app.Command("operator", "Runs the operator which reconciles SBOM objects").Action(c.run)
+	cmd := kingpin.New("sbom-operator", "Runs the operator which reconciles SBOM objects").Action(c.run)
 
 	cmd.Flag("cluster", "Name of the cluster, used when storing SBOMs").Envar("SBOM_CLUSTER").Required().StringVar(&c.Cluster)
 	cmd.Flag("namespace", "Namespace where scanner Pods are run (typically the operator namespace)").Envar("POD_NAMESPACE").Required().StringVar(&c.Namespace)
@@ -223,8 +207,9 @@ func Operator(app *kingpin.Application) {
 	cmd.Flag("requests-memory", "Memory requested by scanner Pods").Envar("SBOM_REQUESTS_MEMORY").Default("256Mi").StringVar(&c.RequestsMemory)
 	cmd.Flag("limits-cpu", "CPU limit for scanner Pods").Envar("SBOM_LIMITS_CPU").Default("1").StringVar(&c.LimitsCPU)
 	cmd.Flag("limits-memory", "Memory limit for scanner Pods").Envar("SBOM_LIMITS_MEMORY").Default("1Gi").StringVar(&c.LimitsMemory)
-	cmd.Flag("skpr-releases", "Create SBOMs for Skpr Releases (requires the workflow.skpr.io CRDs)").Envar("SBOM_SKPR_RELEASES").BoolVar(&c.SkprReleases)
 	cmd.Flag("metrics-bind-address", "Address the metrics endpoint binds to").Envar("SBOM_METRICS_BIND_ADDRESS").Default(":8080").StringVar(&c.MetricsBindAddress)
 	cmd.Flag("health-probe-bind-address", "Address the health probe endpoint binds to").Envar("SBOM_HEALTH_PROBE_BIND_ADDRESS").Default(":8081").StringVar(&c.HealthProbeBindAddress)
 	cmd.Flag("leader-elect", "Enable leader election").Envar("SBOM_LEADER_ELECT").BoolVar(&c.LeaderElect)
+
+	kingpin.MustParse(cmd.Parse(os.Args[1:]))
 }
