@@ -5,7 +5,7 @@ resources:
   - ../rbac
   - ../manager
 
-# Settings for the operator. See "sbom operator --help" for all options.
+# Settings for the operator. See "sbom-operator --help" for all options.
 configMapGenerator:
   - name: sbom-operator
     envs:

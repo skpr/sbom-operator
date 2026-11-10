@@ -79,7 +79,7 @@ func TestReconcile(t *testing.T) {
 	assert.Equal(t, sbom.Namespace, pod.Annotations[AnnotationNamespace])
 	assert.Equal(t, sbom.Name, pod.Annotations[AnnotationName])
 	assert.Equal(t, sbom.Spec.Image, pod.Spec.Volumes[0].Image.Reference)
-	assert.Equal(t, "scan", pod.Spec.Containers[0].Args[0])
+	assert.Equal(t, []string{ScannerCommand}, pod.Spec.Containers[0].Command)
 	assert.Contains(t, pod.Spec.Containers[0].Args, "--key=sbom/test/project-a/0.0.1-app/"+Hash(sbom)+".cdx.json.gz")
 
 	err = client.Get(context.TODO(), request.NamespacedName, sbom)

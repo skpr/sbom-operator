@@ -1,7 +1,9 @@
-package cmd
+// Package main runs the operator which reconciles SBOM objects.
+package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -202,11 +204,10 @@ func parseTolerations(values []string) ([]corev1.Toleration, error) {
 	return tolerations, nil
 }
 
-// Operator declares the "operator" command.
-func Operator(app *kingpin.Application) {
+func main() {
 	c := new(operatorCommand)
 
-	cmd := app.Command("operator", "Runs the operator which reconciles SBOM objects").Action(c.run)
+	cmd := kingpin.New("sbom-operator", "Runs the operator which reconciles SBOM objects").Action(c.run)
 
 	cmd.Flag("cluster", "Name of the cluster, used when storing SBOMs").Envar("SBOM_CLUSTER").Required().StringVar(&c.Cluster)
 	cmd.Flag("namespace", "Namespace where scanner Pods are run (typically the operator namespace)").Envar("POD_NAMESPACE").Required().StringVar(&c.Namespace)
@@ -227,4 +228,6 @@ func Operator(app *kingpin.Application) {
 	cmd.Flag("metrics-bind-address", "Address the metrics endpoint binds to").Envar("SBOM_METRICS_BIND_ADDRESS").Default(":8080").StringVar(&c.MetricsBindAddress)
 	cmd.Flag("health-probe-bind-address", "Address the health probe endpoint binds to").Envar("SBOM_HEALTH_PROBE_BIND_ADDRESS").Default(":8081").StringVar(&c.HealthProbeBindAddress)
 	cmd.Flag("leader-elect", "Enable leader election").Envar("SBOM_LEADER_ELECT").BoolVar(&c.LeaderElect)
+
+	kingpin.MustParse(cmd.Parse(os.Args[1:]))
 }

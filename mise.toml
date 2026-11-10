@@ -16,8 +16,8 @@ controller-gen rbac:roleName=sbom-operator paths=./internal/controller/... outpu
 """
 
 [tasks.build]
-description = "Builds the binary"
-run = "go build -o bin/sbom ."
+description = "Builds the binaries"
+run = "go build -o bin/ ./cmd/..."
 
 [tasks.test]
 description = "Runs the tests"

@@ -55,7 +55,7 @@ spec:
 
 ## Configuration
 
-All flags can also be set using environment variables, see `sbom operator --help`.
+All flags can also be set using environment variables, see `sbom-operator --help`.
 
 | Flag | Environment variable | Default | Description |
 |---|---|---|---|
