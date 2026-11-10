@@ -9,7 +9,6 @@ rules:
   resources:
   - sboms
   verbs:
-  - create
   - get
   - list
   - patch
@@ -29,14 +28,6 @@ rules:
   - get
   - patch
   - update
-- apiGroups:
-  - workflow.skpr.io
-  resources:
-  - releases
-  verbs:
-  - get
-  - list
-  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

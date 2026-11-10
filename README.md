@@ -72,18 +72,12 @@ All flags can also be set using environment variables, see `sbom-operator --help
 | `--active-deadline` | `SBOM_ACTIVE_DEADLINE` | `30m` | How long a scanner Pod can run before it fails. |
 | `--requests-cpu` / `--requests-memory` | `SBOM_REQUESTS_*` | `100m` / `256Mi` | Scanner Pod requests. |
 | `--limits-cpu` / `--limits-memory` | `SBOM_LIMITS_*` | `1` / `1Gi` | Scanner Pod limits. |
-| `--skpr-releases` | `SBOM_SKPR_RELEASES` | `false` | Create SBOMs for Skpr Releases. |
-
-## Skpr integration
-
-When `--skpr-releases` is enabled an `SBOM` object is created for each image in a Skpr `Release`
-(`workflow.skpr.io/v1beta1`). SBOMs are owned by the Release and are removed with it.
 
 ## Notes
 
 * SBOMs are generated once. Delete the `SBOM` object to regenerate it.
 * `SBOM` objects use a finalizer to remove their scanner Pod. Keep the operator running until all `SBOM` objects have been deleted.
-* The operator never deletes objects from the bucket, so SBOMs outlive their `SBOM` object (and Release) for auditing.
+* The operator never deletes objects from the bucket, so SBOMs outlive their `SBOM` object for auditing.
   Retention is controlled by the bucket, eg. a lifecycle rule which expires objects under `<prefix>/`.
 
 ## Development
