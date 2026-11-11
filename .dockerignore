@@ -1,8 +1,0 @@
-bin/
-config/
-hack/
-*.md
-.git/
-.github/
-coverage.out
-mise.toml

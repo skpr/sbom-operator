@@ -86,5 +86,5 @@ All flags can also be set using environment variables, see `sbom-operator --help
 mise run generate   # Deepcopy, CRDs and RBAC
 mise run test
 mise run lint
-mise run docker
+mise run snapshot   # Binaries and image via GoReleaser, nothing is published
 ```
