@@ -48,3 +48,22 @@ jobs:
 
       - name: 🔍 Check for uncommitted changes
         run: git diff --exit-code
+
+  snapshot:
+    name: 📋 Snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Git clone the repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Install Mise
+        uses: jdx/mise-action@v4
+
+      - name: 🏗️ Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Builds the binaries and image without publishing to check the GoReleaser configuration.
+      - name: 🧪 Snapshot
+        run: mise run snapshot
